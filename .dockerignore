@@ -1,0 +1,11 @@
+target/
+**/target/
+.git/
+.github/
+**/*.swp
+.DS_Store
+.vscode/
+.idea/
+*.fatbin
+fatbin/
+build/
