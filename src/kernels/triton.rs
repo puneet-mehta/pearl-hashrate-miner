@@ -123,14 +123,6 @@ fn null_terminate(blob: &[u8]) -> Vec<u8> {
     v
 }
 
-// Legacy cubin re-exports for callers still on the cubin path
-// (`triton-smoke` bin). (transitional helper);
-// PTX on every arch.
-pub const NOISING_CUBIN_SM89: &[u8] =
-    include_bytes!("../../triton_kernels/sm89/noising_kernel.cubin");
-pub const SEARCH_NOROTL_CUBIN_SM89: &[u8] =
-    include_bytes!("../../triton_kernels/sm89/pearl_search_norotl_kernel.cubin");
-
 // =============================================================================
 //   Kernel constants (must match the JIT-time constexpr values)
 // =============================================================================

@@ -10,7 +10,6 @@
 //! block — the work is 16 Blake3 round operations total, fits comfortably.
 
 use std::ffi::c_void;
-use std::ptr;
 
 use cudarc::driver::sys::{CUdeviceptr, CUfunction, CUstream};
 

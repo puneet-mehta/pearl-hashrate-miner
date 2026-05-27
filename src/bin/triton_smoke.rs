@@ -1,16 +1,11 @@
-//! Standalone smoke for the embedded Triton cubins.
+//! Standalone smoke test for the embedded Triton kernels.
 //!
-//! Loads the embedded `noising_kernel.cubin` and
-//! `pearl_search_norotl_kernel.cubin`, dispatches them on synthetic
-//! inputs, and verifies:
+//! Loads `noising_kernel` + `pearl_search_norotl_kernel` PTX, dispatches
+//! them on synthetic inputs, and verifies:
 //!
-//! 1. The cubins load via `cuModuleLoadData`.
+//! 1. The PTX loads via `cuModuleLoadData` (driver JIT).
 //! 2. The kernel symbols resolve.
 //! 3. The launchers don't crash (no kernel-arg-layout errors).
-//!
-//! Bit-exactness vs Python output is checked separately by
-//! `parity/triton_parity.py` (next commit) which dumps Python's
-//! intermediates from the same fixture.
 
 use std::process::ExitCode;
 
@@ -19,8 +14,8 @@ use cudarc::driver::sys as cu;
 use pearl_hashrate_miner::driver::{CudaCtx, DevBuf, Module};
 use pearl_hashrate_miner::error::cu_check;
 use pearl_hashrate_miner::kernels::triton::{
-    TritonNoising, TritonSearchNorotl, BLOCK_M, BLOCK_N, HASH_CANDIDATES, JACKPOT_SIZE,
-    NOISING_CUBIN_SM89, SEARCH_NOROTL_CUBIN_SM89,
+    noising_ptx, search_norotl_ptx, TritonNoising, TritonSearchNorotl, BLOCK_M, BLOCK_N,
+    HASH_CANDIDATES, JACKPOT_SIZE,
 };
 
 fn main() -> ExitCode {
@@ -34,21 +29,18 @@ fn main() -> ExitCode {
 fn run() -> Result<(), pearl_hashrate_miner::MinerError> {
     let ctx = CudaCtx::new(0)?;
     println!("device: {}", ctx.device_name()?);
+    let (cc_maj, cc_min) = ctx.compute_capability()?;
 
-    // ----- Load Triton cubins -----
-    println!(
-        "loading noising cubin ({} bytes)…",
-        NOISING_CUBIN_SM89.len()
-    );
-    let noising_mod = Module::load_fatbin(NOISING_CUBIN_SM89)?;
+    // ----- Load Triton kernels (PTX, driver JITs to device CC) -----
+    let noising_blob = noising_ptx(cc_maj, cc_min);
+    println!("loading noising PTX ({} bytes)…", noising_blob.len());
+    let noising_mod = Module::load_data(&noising_blob)?;
     let noising = TritonNoising::new(&noising_mod)?;
     println!("  noising kernel loaded");
 
-    println!(
-        "loading search cubin ({} bytes)…",
-        SEARCH_NOROTL_CUBIN_SM89.len()
-    );
-    let search_mod = Module::load_fatbin(SEARCH_NOROTL_CUBIN_SM89)?;
+    let search_blob = search_norotl_ptx(cc_maj, cc_min);
+    println!("loading search PTX ({} bytes)…", search_blob.len());
+    let search_mod = Module::load_data(&search_blob)?;
     let search = TritonSearchNorotl::new(&search_mod)?;
     println!("  search kernel loaded");
 
