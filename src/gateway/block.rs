@@ -215,7 +215,7 @@ pub fn calculate_merkle_root(txs: &[Transaction]) -> [u8; 32] {
     }
 
     while level.len() > 1 {
-        let mut next = Vec::with_capacity((level.len() + 1) / 2);
+        let mut next = Vec::with_capacity(level.len().div_ceil(2));
         let n = level.len();
         let mut i = 0;
         while i < n {
@@ -374,7 +374,7 @@ fn push_script_number(n: i64, out: &mut Vec<u8>) {
         return;
     }
     // OP_1..OP_16 short forms.
-    if n >= 1 && n <= 16 {
+    if (1..=16).contains(&n) {
         out.push(0x50 + n as u8);
         return;
     }

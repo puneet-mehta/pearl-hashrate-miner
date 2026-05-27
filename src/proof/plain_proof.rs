@@ -26,6 +26,7 @@ use crate::error::MinerError;
 /// Returns a PlainProof whose serialized form (`bincode::serialize +
 /// base64`) matches what Python's `_run_iter_body` → gateway path
 /// produces.
+#[allow(clippy::too_many_arguments)]
 pub fn build_plain_proof(
     m: usize,
     n: usize,

@@ -141,7 +141,7 @@ impl PearldClient {
             if !err.is_null() {
                 return Err(MinerError::Rpc {
                     method: "submitblock".to_string(),
-                    msg: format!("pearld error: {}", err),
+                    msg: format!("pearld error: {err}"),
                 });
             }
         }
@@ -151,7 +151,7 @@ impl PearldClient {
             }
             return Err(MinerError::Rpc {
                 method: "submitblock".to_string(),
-                msg: format!("rejected: {}", r),
+                msg: format!("rejected: {r}"),
             });
         }
         Ok(())

@@ -77,8 +77,8 @@ impl ParsedSignalHeader {
         let mma_size = [i32at(580), i32at(584), i32at(588)];
         let mma_tile_size = [i32at(592), i32at(596), i32at(600)];
         let mut target = [0u32; 8];
-        for i in 0..8 {
-            target[i] = u32at(604 + i * 4);
+        for (i, slot) in target.iter_mut().enumerate() {
+            *slot = u32at(604 + i * 4);
         }
         Ok(ParsedSignalHeader {
             status,

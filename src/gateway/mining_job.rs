@@ -193,7 +193,7 @@ pub fn build_mining_config_triton_norotl(
 fn hex_to_array32(s: &str) -> Result<[u8; 32], MinerError> {
     let bytes = hex::decode(s).map_err(|e| MinerError::Rpc {
         method: "build_job".to_string(),
-        msg: format!("hex decode {}: {}", s, e),
+        msg: format!("hex decode {s}: {e}"),
     })?;
     if bytes.len() != 32 {
         return Err(MinerError::Rpc {
