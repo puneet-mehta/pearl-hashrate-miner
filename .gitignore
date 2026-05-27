@@ -1,0 +1,9 @@
+target/
+**/target/
+*.fatbin
+fatbin/
+build/
+.DS_Store
+.idea/
+.vscode/
+*.swp
