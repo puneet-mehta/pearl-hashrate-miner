@@ -29,6 +29,42 @@ docker run --gpus all --rm \
     pearl-miner-live
 ```
 
+### Vast.ai
+
+The published image runs as-is on a rented vast.ai GPU. Pass `--entrypoint`
+so vast.ai launches the image's own entrypoint (the miner) as the container's
+main process — its stdout/stderr then stream into `vastai logs`. Without
+`--entrypoint`, vast.ai wraps the image with its SSH harness and your
+entrypoint never runs.
+
+The host driver must be **≥ 575** (the published image is built against CUDA
+12.9; older drivers fail at load with `CUDA_ERROR_UNSUPPORTED_PTX_VERSION`).
+Filter offers accordingly.
+
+```bash
+# 1. Pick a single-5090 offer with a new-enough driver.
+vastai search offers \
+    'gpu_name=RTX_5090 num_gpus=1 verified=true rented=false
+     driver_version>=575.0.0 disk_space>=20 duration>=2' \
+    -o dph_total --limit 5
+
+# 2. Launch in args-mode (image entrypoint = PID 1, logs → vastai logs).
+vastai create instance <OFFER_ID> \
+    --image ghcr.io/puneet-mehta/pearl-hashrate-miner:latest \
+    --disk 20 \
+    --entrypoint /usr/local/bin/pearl-miner-live \
+    --env '-e PEARLD_RPC_URL=<PEARLD_RPC_URL> \
+           -e PEARLD_RPC_USER=<PEARLD_RPC_USER> \
+           -e PEARLD_RPC_PASSWORD=<PEARLD_RPC_PASSWORD> \
+           -e PEARLD_MINING_ADDRESS=<PEARLD_MINING_ADDRESS>'
+
+# 3. Tail miner output.
+vastai logs <INSTANCE_ID> --tail 200
+
+# 4. Tear down.
+vastai destroy instance <INSTANCE_ID>
+```
+
 ### From source
 
 ```bash
